@@ -1,4 +1,4 @@
-package org.donntu.android.lab2.service;
+package org.donntu.android.lab2.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;

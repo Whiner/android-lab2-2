@@ -1,4 +1,4 @@
-package org.donntu.android.lab2.service;
+package org.donntu.android.lab2.utils;
 
 import android.app.Activity;
 import android.view.View;

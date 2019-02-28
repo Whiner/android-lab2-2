@@ -17,9 +17,8 @@ import org.donntu.android.lab2.dto.TranslationType;
 import org.donntu.android.lab2.dto.Word;
 import org.donntu.android.lab2.exception.NotEnoughWordsException;
 import org.donntu.android.lab2.exception.WordExistException;
-import org.donntu.android.lab2.service.AddService;
 import org.donntu.android.lab2.service.FileService;
-import org.donntu.android.lab2.service.MyTimerTask;
+import org.donntu.android.lab2.utils.MyTimerTask;
 import org.donntu.android.lab2.service.SpeechService;
 import org.donntu.android.lab2.service.WordService;
 
@@ -27,12 +26,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 
+//TODO: инициализировать Speech Locale заранее, а не во время переключения
+//TODO: сделать Game Service, который будет выполнять логику предыдущего WordService в UI
+
 public class MainActivity extends AppCompatActivity {
     private String EXPORT_FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
     private String EXPORT_FILE_NAME = "words.txt";
 
-    private WordService wordService;
-    private AddService addService;
     private SpeechService speechService;
     private Timer timer = new Timer();
     private FileService fileService = new FileService();
@@ -41,11 +41,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        wordService = new WordService(
-                TranslationType.RUS_TO_ENG,
-                this
-        );
-        addService = new AddService(this);
         speechService = new SpeechService(this);
         initMainLayout();
     }
@@ -54,17 +49,17 @@ public class MainActivity extends AppCompatActivity {
         updateAvailableWordsCount();
         Button startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(event -> {
-            wordService.updateData();
+//            wordService.updateData();
             if (isAvailableWordsExist()) {
                 setContentView(R.layout.game);
-                wordService.setViews(
+                /*wordService.setViews(
                         new TextView[]{
                                 findViewById(R.id.word1),
                                 findViewById(R.id.word2),
                                 findViewById(R.id.word3),
                                 findViewById(R.id.word4)}
-                );
-                wordService.setMainView(findViewById(R.id.word));
+                );*/
+//                wordService.setMainView(findViewById(R.id.word));
                 nextWord();
 
                 setLayoutListener(R.id.word1_layout);
@@ -106,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
 
         Button changeLangButton = findViewById(R.id.changeLangButton);
         TextView langTextBox = findViewById(R.id.langTextbox);
-        langTextBox.setText(wordService.getType().getValue());
-        changeLangButton.setOnClickListener(event -> langTextBox.setText(wordService.revertLang()));
+        /*langTextBox.setText(wordService.getType().getValue());
+        changeLangButton.setOnClickListener(event -> langTextBox.setText(wordService.revertLang()));*/
     }
 
     private void setMainLayout() {
@@ -116,39 +111,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addWord(String russian, String english) {
-        try {
+        /*try {
             addService.addWord(russian, english);
             Toast.makeText(this, "Добавлено!", Toast.LENGTH_SHORT).show();
         } catch (WordExistException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        }*/
     }
 
     private void listenWord(String text) {
-        if (wordService.getType() == TranslationType.RUS_TO_ENG) {
+       /* if (wordService.getType() == TranslationType.RUS_TO_ENG) {
             speechService.speech(text, new Locale("ru"));
         } else {
             speechService.speech(text, Locale.ENGLISH);
-        }
+        }*/
     }
 
     private boolean isAvailableWordsExist() {
-        try {
+       /* try {
             wordService.checkAvailableWords();
             return true;
         } catch (NotEnoughWordsException e) {
             showExceptionDialog(e.getMessage());
             return false;
-        }
+        }*/
+       return false;
     }
 
     private void setLayoutListener(int layout) {
         LinearLayout word_layout = findViewById(layout);
         word_layout.setOnClickListener(event -> {
-            boolean right = wordService.checkAnswer(
+           /* boolean right = wordService.checkAnswer(
                     (TextView) word_layout.getChildAt(0)
             );
-            showResult(right);
+            showResult(right);*/
             nextWord();
         });
     }
@@ -163,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateAvailableWordsCount() {
         TextView wordsCount = findViewById(R.id.availableWordsCountTextView);
-        wordsCount.setText(String.valueOf(wordService.getAvailableWordsCount()));
+//        wordsCount.setText(String.valueOf(wordService.getAvailableWordsCount()));
     }
 
     private void showMessage(String text, int color) {
@@ -186,17 +182,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextWord() {
-        try {
+        /*try {
             wordService.nextWord();
         } catch (NotEnoughWordsException e) {
             showExceptionDialog(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public void importWords(MenuItem item) {
-        fileService.openFileDialog(this, fileName -> {
+        /*fileService.openFileDialog(this, fileName -> {
             try {
                 List<Word> words = fileService.importFromFile(fileName);
                 wordService.addAll(words);
@@ -205,19 +201,19 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 showExceptionDialog(e.getMessage());
             }
-        });
+        });*/
     }
 
     public void exportWords(MenuItem item) {
-        try {
-            fileService.exportToFile(EXPORT_FILE_PATH, EXPORT_FILE_NAME, wordService.getWords());
-        } catch (Exception e) {
-            showExceptionDialog(e.getMessage());
-        }
+//        try {
+//            fileService.exportToFile(EXPORT_FILE_PATH, EXPORT_FILE_NAME, wordService.getWords());
+//        } catch (Exception e) {
+//            showExceptionDialog(e.getMessage());
+//        }
     }
 
     public void refreshArchive(MenuItem item) {
-        wordService.refreshArchive();
+//        wordService.refreshArchive();
         updateAvailableWordsCount();
     }
 
@@ -231,9 +227,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (wordService != null) {
-            wordService.close();
-        }
+//        if (wordService != null) {
+//            wordService.close();
+//        }
         speechService.destroy();
     }
 

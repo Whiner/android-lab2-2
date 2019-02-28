@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Word {
+public class WordWithTranslation {
     private String russian;
     private String english;
-
-    public static Word of(WordResponse wordResponse){
-        return new Word(wordResponse.getRussian(), wordResponse.getEnglish());
-    }
 }

@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Word {
+public class WordResponse {
+    private long id;
     private String russian;
     private String english;
-
-    public static Word of(WordResponse wordResponse){
-        return new Word(wordResponse.getRussian(), wordResponse.getEnglish());
-    }
 }

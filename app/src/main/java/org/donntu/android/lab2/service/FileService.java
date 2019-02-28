@@ -2,7 +2,8 @@ package org.donntu.android.lab2.service;
 
 import android.content.Context;
 
-import org.donntu.android.lab2.dto.Word;
+import org.donntu.android.lab2.dto.FullWordInfo;
+import org.donntu.android.lab2.utils.OpenFileDialog;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,19 +19,19 @@ public class FileService {
     private final String FILE_REGEX_STRUCT = "\\[(.+)\\]:\\[(.+)\\]:\\[(.+)\\]";
     private final int GROUPS_COUNT = 3;
 
-    public void exportToFile(String path, String filename, List<Word> words) throws Exception {
+    public void exportToFile(String path, String filename, List<FullWordInfo> words) throws Exception {
         File file = new File(path, filename);
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
-            for (Word word : words) {
+            for (FullWordInfo word : words) {
                 bufferedWriter.write(word.toFileForm() + "\n");
             }
         }
     }
 
-    public List<Word> importFromFile(String path) throws Exception {
+    public List<FullWordInfo> importFromFile(String path) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
             throw new Exception("Файл " + file.getPath() + " не существует");
@@ -38,12 +39,12 @@ public class FileService {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             Pattern pattern = Pattern.compile(FILE_REGEX_STRUCT);
             String line;
-            List<Word> words = new ArrayList<>();
+            List<FullWordInfo> words = new ArrayList<>();
             while ((line = bufferedReader.readLine()) != null) {
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.groupCount() == GROUPS_COUNT) {
                     if (matcher.find()) {
-                        Word word = new Word();
+                        FullWordInfo word = new FullWordInfo();
                         word.setRussianTranslate(matcher.group(1));
                         word.setEnglishTranslate(matcher.group(2));
                         word.setInArchive(Boolean.valueOf(matcher.group(3)));

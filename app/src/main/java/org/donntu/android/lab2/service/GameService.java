@@ -8,6 +8,8 @@ import org.donntu.android.lab2.dto.WordWithAnswerVariants;
 import java.util.List;
 import java.util.Random;
 
+import lombok.Getter;
+
 public class GameService {
     public static final String RUS_TO_ENG = "Русский -> Английский";
     public static final String ENG_TO_RUS = "Английский -> Русский";
@@ -15,6 +17,7 @@ public class GameService {
     private final WordService wordService = new WordService();
     private final Random random = new Random();
 
+    @Getter
     private TranslationType translationType = TranslationType.RUS_TO_ENG;
 
     private int answersVersionsCount = 4;
@@ -24,7 +27,7 @@ public class GameService {
 
 
     public void fillTextViews(TextView main, List<TextView> variants) throws Exception {
-        if(variants.size() != answersVersionsCount) {
+        if (variants.size() != answersVersionsCount) {
             throw new Exception("Количество TextView должно быть равно " +
                     "answersVersionsCount (" + answersVersionsCount + ")");
         }
@@ -32,28 +35,39 @@ public class GameService {
         WordWithAnswerVariants word = wordService.nextWord(translationType, answersVersionsCount);
 
         this.lastRightAnswerWordId = word.getWordId();
+        this.lastRightAnswerTextViewId = variants
+                .get(word.getAnswerIndex())
+                .getId();
         main.setText(word.getWord());
-
-        int rightVariantTextViewIndex = random.nextInt(answersVersionsCount);
 
         List<String> answerVersions = word.getAnswerVersions();
 
-        for (int i = 0, j = 0; i < answerVersions.size(); i++) {
-            if(i == rightVariantTextViewIndex) {
-                variants.get(i).setText(word.getWordTranslation());
-            } else {
-                variants.get(i).setText(answerVersions.get(j));
-                j++;
-            }
+        for (int i = 0; i < answerVersions.size(); i++) {
+            variants.get(i).setText(answerVersions.get(i));
         }
     }
 
     public boolean checkAnswer(TextView textView) {
-        if(textView.getId() == lastRightAnswerTextViewId) {
+        if (textView.getId() == lastRightAnswerTextViewId) {
             wordService.processRightAnswer(lastRightAnswerWordId);
             return true;
         }
 
         return false;
     }
+
+    public String revertLang() {
+        switch (translationType) {
+            case RUS_TO_ENG:
+                this.translationType = TranslationType.ENG_TO_RUS;
+                return ENG_TO_RUS;
+            case ENG_TO_RUS:
+                this.translationType = TranslationType.RUS_TO_ENG;
+                return RUS_TO_ENG;
+            default:
+                return "";
+        }
+    }
+
+
 }

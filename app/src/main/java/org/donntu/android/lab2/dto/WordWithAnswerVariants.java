@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public class WordWithAnswerVariants {
     private long wordId;
     private String word;
-    private String wordTranslation;
+    private int answerIndex;
     private List<String> answerVersions = new ArrayList<>();
 }

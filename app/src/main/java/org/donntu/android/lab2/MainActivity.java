@@ -11,17 +11,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.donntu.android.lab2.dto.TranslationType;
-import org.donntu.android.lab2.dto.Word;
-import org.donntu.android.lab2.exception.NotEnoughWordsException;
-import org.donntu.android.lab2.exception.WordExistException;
 import org.donntu.android.lab2.service.FileService;
-import org.donntu.android.lab2.utils.MyTimerTask;
+import org.donntu.android.lab2.service.GameService;
 import org.donntu.android.lab2.service.SpeechService;
-import org.donntu.android.lab2.service.WordService;
+import org.donntu.android.lab2.utils.MyTimerTask;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -35,7 +33,12 @@ public class MainActivity extends AppCompatActivity {
 
     private SpeechService speechService;
     private Timer timer = new Timer();
+
+    private List<TextView> textViews = new ArrayList<>();
+    private TextView answerTextView;
+
     private FileService fileService = new FileService();
+    private GameService gameService = new GameService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,61 +51,79 @@ public class MainActivity extends AppCompatActivity {
     private void initMainLayout() {
         updateAvailableWordsCount();
         Button startButton = findViewById(R.id.startButton);
-        startButton.setOnClickListener(event -> {
-//            wordService.updateData();
-            if (isAvailableWordsExist()) {
-                setContentView(R.layout.game);
-                /*wordService.setViews(
-                        new TextView[]{
-                                findViewById(R.id.word1),
-                                findViewById(R.id.word2),
-                                findViewById(R.id.word3),
-                                findViewById(R.id.word4)}
-                );*/
-//                wordService.setMainView(findViewById(R.id.word));
-                nextWord();
-
-                setLayoutListener(R.id.word1_layout);
-                setLayoutListener(R.id.word2_layout);
-                setLayoutListener(R.id.word3_layout);
-                setLayoutListener(R.id.word4_layout);
-
-
-                Button playButton = findViewById(R.id.playWord);
-                playButton.setOnClickListener(v -> {
-                    TextView word = findViewById(R.id.word);
-                    listenWord(word.getText().toString());
-                });
-
-                Button stopButton = findViewById(R.id.stopButton);
-                stopButton.setOnClickListener(v -> setMainLayout());
-            }
-        });
+        startButton.setOnClickListener(event -> initGameLayout());
 
         Button addNewWordButton = findViewById(R.id.addNewWordButton);
-        addNewWordButton.setOnClickListener(v -> {
-            setContentView(R.layout.add);
-            Button addButton = findViewById(R.id.addButton);
-            TextView russian = findViewById(R.id.russianWord);
-            TextView english = findViewById(R.id.englishWord);
-            addButton.setOnClickListener(v1 -> {
-                addWord(russian.getText().toString(), english.getText().toString());
-                russian.setText("");
-                english.setText("");
-            });
-
-            Button backButton = findViewById(R.id.backButton);
-            backButton.setOnClickListener(v1 -> {
-                russian.setText("");
-                english.setText("");
-                setMainLayout();
-            });
-        });
+        addNewWordButton.setOnClickListener(v -> initNewWordLayout());
 
         Button changeLangButton = findViewById(R.id.changeLangButton);
         TextView langTextBox = findViewById(R.id.langTextbox);
-        /*langTextBox.setText(wordService.getType().getValue());
-        changeLangButton.setOnClickListener(event -> langTextBox.setText(wordService.revertLang()));*/
+        langTextBox.setText(gameService.getTranslationType().getValue());
+        changeLangButton.setOnClickListener(
+                event -> langTextBox.setText(gameService.revertLang())
+        );
+    }
+
+    private void initGameLayout() {
+        if (isAvailableWordsExist()) {
+            setContentView(R.layout.game);
+            nextWord();
+
+            setLayoutListener(R.id.word1_layout);
+            setLayoutListener(R.id.word2_layout);
+            setLayoutListener(R.id.word3_layout);
+            setLayoutListener(R.id.word4_layout);
+
+
+            Button playButton = findViewById(R.id.playWord);
+            playButton.setOnClickListener(v -> {
+                TextView word = findViewById(R.id.word);
+                listenWord(word.getText().toString());
+            });
+
+            Button stopButton = findViewById(R.id.stopButton);
+            stopButton.setOnClickListener(v -> setMainLayout());
+        }
+    }
+
+    private void initNewWordLayout() {
+        setContentView(R.layout.add);
+        Button addButton = findViewById(R.id.addButton);
+        TextView russian = findViewById(R.id.russianWord);
+        TextView english = findViewById(R.id.englishWord);
+        addButton.setOnClickListener(v1 -> {
+            addWord(russian.getText().toString(), english.getText().toString());
+            russian.setText("");
+            english.setText("");
+        });
+
+        Button backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v1 -> {
+            russian.setText("");
+            english.setText("");
+            setMainLayout();
+        });
+    }
+
+    private void nextWord() {
+        try {
+            if (textViews.isEmpty()) {
+                Collections.addAll(
+                        textViews,
+                        findViewById(R.id.word1),
+                        findViewById(R.id.word2),
+                        findViewById(R.id.word3),
+                        findViewById(R.id.word4)
+                );
+            }
+            if (answerTextView == null) {
+                answerTextView = findViewById(R.id.word);
+            }
+
+            gameService.fillTextViews(answerTextView, textViews);
+        } catch (Exception e) {
+            showExceptionDialog(e.getMessage());
+        }
     }
 
     private void setMainLayout() {
@@ -120,11 +141,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void listenWord(String text) {
-       /* if (wordService.getType() == TranslationType.RUS_TO_ENG) {
+        if (gameService.getTranslationType() == TranslationType.RUS_TO_ENG) {
             speechService.speech(text, new Locale("ru"));
         } else {
             speechService.speech(text, Locale.ENGLISH);
-        }*/
+        }
     }
 
     private boolean isAvailableWordsExist() {
@@ -135,16 +156,16 @@ public class MainActivity extends AppCompatActivity {
             showExceptionDialog(e.getMessage());
             return false;
         }*/
-       return false;
+        return true;
     }
 
     private void setLayoutListener(int layout) {
         LinearLayout word_layout = findViewById(layout);
         word_layout.setOnClickListener(event -> {
-           /* boolean right = wordService.checkAnswer(
+            boolean right = gameService.checkAnswer(
                     (TextView) word_layout.getChildAt(0)
             );
-            showResult(right);*/
+            showResult(right);
             nextWord();
         });
     }
@@ -158,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAvailableWordsCount() {
-        TextView wordsCount = findViewById(R.id.availableWordsCountTextView);
+      //  TextView wordsCount = findViewById(R.id.availableWordsCountTextView);
 //        wordsCount.setText(String.valueOf(wordService.getAvailableWordsCount()));
     }
 
@@ -179,16 +200,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showMessage("Не то(", Color.RED);
         }
-    }
-
-    private void nextWord() {
-        /*try {
-            wordService.nextWord();
-        } catch (NotEnoughWordsException e) {
-            showExceptionDialog(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
     }
 
     public void importWords(MenuItem item) {
@@ -214,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void refreshArchive(MenuItem item) {
 //        wordService.refreshArchive();
-        updateAvailableWordsCount();
+    //    updateAvailableWordsCount();
     }
 
     @Override
@@ -227,9 +238,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if (wordService != null) {
-//            wordService.close();
-//        }
         speechService.destroy();
     }
 

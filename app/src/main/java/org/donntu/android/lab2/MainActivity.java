@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.donntu.android.lab2.dto.TranslationType;
+import org.donntu.android.lab2.exception.NotEnoughWordsException;
 import org.donntu.android.lab2.service.FileService;
 import org.donntu.android.lab2.service.GameService;
 import org.donntu.android.lab2.service.SpeechService;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private SpeechService speechService;
     private Timer timer = new Timer();
+    private Locale ru = new Locale("ru");
+
 
     private List<TextView> textViews = new ArrayList<>();
     private TextView answerTextView;
@@ -142,21 +145,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void listenWord(String text) {
         if (gameService.getTranslationType() == TranslationType.RUS_TO_ENG) {
-            speechService.speech(text, new Locale("ru"));
+            speechService.speech(text, ru);
         } else {
             speechService.speech(text, Locale.ENGLISH);
         }
     }
 
     private boolean isAvailableWordsExist() {
-       /* try {
-            wordService.checkAvailableWords();
+        try {
+            gameService.checkAvailableWords();
             return true;
-        } catch (NotEnoughWordsException e) {
+        } catch (Exception e) {
             showExceptionDialog(e.getMessage());
             return false;
-        }*/
-        return true;
+        }
     }
 
     private void setLayoutListener(int layout) {
@@ -179,8 +181,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAvailableWordsCount() {
-      //  TextView wordsCount = findViewById(R.id.availableWordsCountTextView);
-//        wordsCount.setText(String.valueOf(wordService.getAvailableWordsCount()));
+        TextView wordsCount = findViewById(R.id.availableWordsCountTextView);
+        try {
+            gameService.updateAvailableWordsCount(wordsCount);
+        } catch (InterruptedException e) {
+            showExceptionDialog(e.getMessage());
+        }
     }
 
     private void showMessage(String text, int color) {

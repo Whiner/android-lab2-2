@@ -19,4 +19,7 @@ public interface RequestClient {
 
     @PUT("/add")
     Call<ResponseBody> addWord(@Query("word") WordWithTranslation word);
+
+    @GET("/av-words-count")
+    Call<Integer> getAvailableWordsCount();
 }

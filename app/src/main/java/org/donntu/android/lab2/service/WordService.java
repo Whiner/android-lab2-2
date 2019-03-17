@@ -5,13 +5,12 @@ import org.donntu.android.lab2.dto.TranslationType;
 import org.donntu.android.lab2.dto.WordResponse;
 import org.donntu.android.lab2.dto.WordWithAnswerVariants;
 
-import java.io.IOException;
 import java.util.List;
 
 public class WordService {
     private final RequestService requestService = new RequestService();
 
-    public WordWithAnswerVariants nextWord(TranslationType type, int answersVersionsCount) throws InterruptedException {
+    public WordWithAnswerVariants nextWord(TranslationType type, int answersVersionsCount) throws Exception {
         NextWordResponse nextWordResponse = requestService.getNextWord(answersVersionsCount);
 
         WordWithAnswerVariants word = new WordWithAnswerVariants();
@@ -47,13 +46,12 @@ public class WordService {
     }
 
 
-    //TODO: реализовать эти методы со стороны сервера и потом клиента
     /*private int countWordsInArchive() {
 
-    }
-
-    public int getAvailableWordsCount() {
-
     }*/
+
+    public int getAvailableWordsCount() throws InterruptedException {
+        return requestService.getAvailableWordsCount();
+    }
 
 }

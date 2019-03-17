@@ -4,6 +4,7 @@ import android.widget.TextView;
 
 import org.donntu.android.lab2.dto.TranslationType;
 import org.donntu.android.lab2.dto.WordWithAnswerVariants;
+import org.donntu.android.lab2.exception.NotEnoughWordsException;
 
 import java.util.List;
 import java.util.Random;
@@ -70,4 +71,13 @@ public class GameService {
     }
 
 
+    public void updateAvailableWordsCount(TextView textView) throws InterruptedException {
+        textView.setText(String.valueOf(wordService.getAvailableWordsCount()));
+    }
+
+    public void checkAvailableWords() throws InterruptedException, NotEnoughWordsException {
+        if(wordService.getAvailableWordsCount() < answersVersionsCount) {
+            throw new NotEnoughWordsException("Недостаточно слов в базе. Добавьте еще или очистите архив");
+        }
+    }
 }

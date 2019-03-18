@@ -13,17 +13,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.donntu.android.lab2.dto.TranslationType;
-import org.donntu.android.lab2.exception.NotEnoughWordsException;
 import org.donntu.android.lab2.service.FileService;
 import org.donntu.android.lab2.service.GameService;
 import org.donntu.android.lab2.service.SpeechService;
+import org.donntu.android.lab2.utils.CallBackHandler;
+import org.donntu.android.lab2.utils.LambdaWrapper;
 import org.donntu.android.lab2.utils.MyTimerTask;
+import org.donntu.android.lab2.utils.OpenFileDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
+
+import static org.donntu.android.lab2.utils.LambdaWrapper.lambdaWrapper;
 
 //TODO: инициализировать Speech Locale заранее, а не во время переключения
 //TODO: сделать Game Service, который будет выполнять логику предыдущего WordService в UI
@@ -48,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         speechService = new SpeechService(this);
+        LambdaWrapper.setExceptionHandler(this::showExceptionDialog);
+        CallBackHandler.setExceptionHandler(this::showExceptionDialog);
         initMainLayout();
     }
 
@@ -135,12 +141,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addWord(String russian, String english) {
-        /*try {
-            addService.addWord(russian, english);
-            Toast.makeText(this, "Добавлено!", Toast.LENGTH_SHORT).show();
-        } catch (WordExistException e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }*/
+        gameService.addWord(russian, english);
     }
 
     private void listenWord(String text) {
@@ -209,29 +210,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void importWords(MenuItem item) {
-        /*fileService.openFileDialog(this, fileName -> {
-            try {
-                List<Word> words = fileService.importFromFile(fileName);
-                wordService.addAll(words);
-                updateAvailableWordsCount();
-                Toast.makeText(this, "Успешно импортировано!", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                showExceptionDialog(e.getMessage());
-            }
-        });*/
+        fileService.openFileDialog(this,
+                (OpenFileDialog.OpenDialogListener)
+                        lambdaWrapper(fileName -> {
+                            try {
+                                gameService.importWords(fileName.toString());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e.getMessage());
+                            }
+                        }));
     }
 
     public void exportWords(MenuItem item) {
-//        try {
-//            fileService.exportToFile(EXPORT_FILE_PATH, EXPORT_FILE_NAME, wordService.getWords());
-//        } catch (Exception e) {
-//            showExceptionDialog(e.getMessage());
-//        }
+        try {
+            gameService.exportWords(EXPORT_FILE_PATH, EXPORT_FILE_NAME);
+        } catch (Exception e) {
+            showExceptionDialog(e.getMessage());
+        }
     }
 
     public void refreshArchive(MenuItem item) {
 //        wordService.refreshArchive();
-    //    updateAvailableWordsCount();
+        //    updateAvailableWordsCount();
     }
 
     @Override

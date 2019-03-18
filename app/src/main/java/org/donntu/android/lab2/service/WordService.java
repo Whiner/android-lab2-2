@@ -4,8 +4,10 @@ import org.donntu.android.lab2.dto.NextWordResponse;
 import org.donntu.android.lab2.dto.TranslationType;
 import org.donntu.android.lab2.dto.WordResponse;
 import org.donntu.android.lab2.dto.WordWithAnswerVariants;
+import org.donntu.android.lab2.dto.WordWithTranslation;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WordService {
     private final RequestService requestService = new RequestService();
@@ -54,4 +56,17 @@ public class WordService {
         return requestService.getAvailableWordsCount();
     }
 
+    public void addAll(List<WordWithTranslation> words) {
+        requestService.add(words);
+    }
+
+    public List<WordWithTranslation> getAll() throws InterruptedException {
+        return requestService.getAll().
+                stream()
+                .map(fullWordInfo ->
+                                new WordWithTranslation(
+                                        fullWordInfo.getRussianTranslate(),
+                                        fullWordInfo.getEnglishTranslate()))
+                .collect(Collectors.toList());
+    }
 }

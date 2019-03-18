@@ -4,8 +4,10 @@ import android.widget.TextView;
 
 import org.donntu.android.lab2.dto.TranslationType;
 import org.donntu.android.lab2.dto.WordWithAnswerVariants;
+import org.donntu.android.lab2.dto.WordWithTranslation;
 import org.donntu.android.lab2.exception.NotEnoughWordsException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -16,7 +18,7 @@ public class GameService {
     public static final String ENG_TO_RUS = "Английский -> Русский";
 
     private final WordService wordService = new WordService();
-    private final Random random = new Random();
+    private final FileService fileService = new FileService();
 
     @Getter
     private TranslationType translationType = TranslationType.RUS_TO_ENG;
@@ -76,8 +78,20 @@ public class GameService {
     }
 
     public void checkAvailableWords() throws InterruptedException, NotEnoughWordsException {
-        if(wordService.getAvailableWordsCount() < answersVersionsCount) {
+        if (wordService.getAvailableWordsCount() < answersVersionsCount) {
             throw new NotEnoughWordsException("Недостаточно слов в базе. Добавьте еще или очистите архив");
         }
+    }
+
+    public void importWords(String filename) throws Exception {
+        wordService.addAll(fileService.importFromFile(filename));
+    }
+
+    public void exportWords(String path, String filename) throws Exception {
+        fileService.exportToFile(path, filename, wordService.getAll());
+    }
+
+    public void addWord(String russian, String english) {
+        wordService.addAll(Collections.singletonList(new WordWithTranslation(russian, english)));
     }
 }

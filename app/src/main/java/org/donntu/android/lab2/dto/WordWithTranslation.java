@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 public class WordWithTranslation {
     private String russian;
     private String english;
+
+    public String toFileForm() {
+        return "[" + russian + "]:[" + english + "]";
+    }
 }

@@ -1,7 +1,11 @@
 package org.donntu.android.lab2.client;
 
+import org.donntu.android.lab2.dto.FullWordInfo;
 import org.donntu.android.lab2.dto.NextWordResponse;
 import org.donntu.android.lab2.dto.WordWithTranslation;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -18,8 +22,11 @@ public interface RequestClient {
     Call<ResponseBody> incRightAnswer(@Query("wordId") Long wordId);
 
     @PUT("/add")
-    Call<ResponseBody> addWord(@Query("word") WordWithTranslation word);
+    Call<ResponseBody> addWords(@Query("words") List<WordWithTranslation> words);
 
     @GET("/av-words-count")
     Call<Integer> getAvailableWordsCount();
+
+    @GET("/all")
+    Call<List<FullWordInfo>> getAllWords();
 }

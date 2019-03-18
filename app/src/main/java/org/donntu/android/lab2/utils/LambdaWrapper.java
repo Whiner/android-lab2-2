@@ -21,8 +21,8 @@ public class LambdaWrapper {
         };
     }
 
-    public static Consumer<Void> lambdaWrapper(Runnable runnable) {
-        return (v) -> {
+    public static Runnable lambdaWrapper(Runnable runnable) {
+        return () -> {
             try {
                 runnable.run();
             } catch (Exception e) {

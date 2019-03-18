@@ -29,16 +29,12 @@ import java.util.Timer;
 
 import static org.donntu.android.lab2.utils.LambdaWrapper.lambdaWrapper;
 
-//TODO: инициализировать Speech Locale заранее, а не во время переключения
-//TODO: сделать Game Service, который будет выполнять логику предыдущего WordService в UI
-
 public class MainActivity extends AppCompatActivity {
     private String EXPORT_FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
     private String EXPORT_FILE_NAME = "words.txt";
 
     private SpeechService speechService;
     private Timer timer = new Timer();
-    private Locale ru = new Locale("ru");
 
 
     private List<TextView> textViews = new ArrayList<>();
@@ -46,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FileService fileService = new FileService();
     private GameService gameService = new GameService();
+    private Locale ru = new Locale("ru");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,18 +113,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void nextWord() {
         try {
-            if (textViews.isEmpty()) {
-                Collections.addAll(
-                        textViews,
-                        findViewById(R.id.word1),
-                        findViewById(R.id.word2),
-                        findViewById(R.id.word3),
-                        findViewById(R.id.word4)
-                );
-            }
-            if (answerTextView == null) {
-                answerTextView = findViewById(R.id.word);
-            }
+            textViews.clear();
+            Collections.addAll(
+                    textViews,
+                    findViewById(R.id.word1),
+                    findViewById(R.id.word2),
+                    findViewById(R.id.word3),
+                    findViewById(R.id.word4)
+            );
+
+            answerTextView = findViewById(R.id.word);
 
             gameService.fillTextViews(answerTextView, textViews);
         } catch (Exception e) {
@@ -174,11 +169,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showExceptionDialog(String message) {
-        new AlertDialog.Builder(this)
+        this.runOnUiThread(() -> new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setNeutralButton("Хорошо", (dialog, which) -> this.setMainLayout())
                 .create()
-                .show();
+                .show()
+        );
+
     }
 
     private void updateAvailableWordsCount() {

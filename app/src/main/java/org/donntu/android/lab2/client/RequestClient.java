@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -22,7 +23,7 @@ public interface RequestClient {
     Call<ResponseBody> incRightAnswer(@Query("wordId") Long wordId);
 
     @PUT("/add")
-    Call<ResponseBody> addWords(@Query("words") List<WordWithTranslation> words);
+    Call<ResponseBody> addWords(@Body List<WordWithTranslation> words);
 
     @GET("/av-words-count")
     Call<Integer> getAvailableWordsCount();

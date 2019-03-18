@@ -30,4 +30,7 @@ public interface RequestClient {
 
     @GET("/all")
     Call<List<FullWordInfo>> getAllWords();
+
+    @POST("/refresh")
+    Call<ResponseBody> refreshArchive();
 }

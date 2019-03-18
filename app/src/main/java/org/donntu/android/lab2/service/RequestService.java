@@ -23,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static org.donntu.android.lab2.utils.LambdaWrapper.lambdaWrapper;
 
 public class RequestService {
-    static final String BASE_URL = "http://192.168.0.102:8080/";
+    static final String BASE_URL = "http://192.168.0.103:8080/";
     private RequestClient requestClient;
 
     public RequestService() {
@@ -99,6 +99,11 @@ public class RequestService {
 
     public void add(List<WordWithTranslation> words) {
         Call<ResponseBody> call = requestClient.addWords(words);
+        call.enqueue(new CallBackHandler<>());
+    }
+
+    public void refreshArchive() {
+        Call<ResponseBody> call = requestClient.refreshArchive();
         call.enqueue(new CallBackHandler<>());
     }
 }

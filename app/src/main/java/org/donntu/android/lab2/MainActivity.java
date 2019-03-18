@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,16 +20,16 @@ import org.donntu.android.lab2.service.SpeechService;
 import org.donntu.android.lab2.utils.CallBackHandler;
 import org.donntu.android.lab2.utils.LambdaWrapper;
 import org.donntu.android.lab2.utils.MyTimerTask;
-import org.donntu.android.lab2.utils.OpenFileDialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 
 import static org.donntu.android.lab2.utils.LambdaWrapper.lambdaWrapper;
-
+//TODO: допилить сброс архива. протестить все остальное. а то поляков доебет потом
 public class MainActivity extends AppCompatActivity {
     private String EXPORT_FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
     private String EXPORT_FILE_NAME = "words.txt";
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private SpeechService speechService;
     private Timer timer = new Timer();
 
+    private Menu optionsMenu;
 
     private List<TextView> textViews = new ArrayList<>();
     private TextView answerTextView;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMainLayout() {
+        setDisableOptionsMenu(false);
         updateAvailableWordsCount();
         Button startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(event -> initGameLayout());
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initGameLayout() {
         if (isAvailableWordsExist()) {
+            setDisableOptionsMenu(true);
             setContentView(R.layout.game);
             nextWord();
 
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initNewWordLayout() {
+        setDisableOptionsMenu(true);
         setContentView(R.layout.add);
         Button addButton = findViewById(R.id.addButton);
         TextView russian = findViewById(R.id.russianWord);
@@ -126,13 +131,22 @@ public class MainActivity extends AppCompatActivity {
 
             gameService.fillTextViews(answerTextView, textViews);
         } catch (Exception e) {
-            showExceptionDialog(e.getMessage());
+            Log.e("fill-error", e.getMessage());
+            setMainLayout();
         }
     }
 
     private void setMainLayout() {
         setContentView(R.layout.main);
         initMainLayout();
+    }
+
+    private void setDisableOptionsMenu(boolean disable) {
+        if(optionsMenu != null) {
+            optionsMenu.getItem(0).setEnabled(!disable);
+            optionsMenu.getItem(1).setEnabled(!disable);
+            optionsMenu.getItem(2).setEnabled(!disable);
+        }
     }
 
     private void addWord(String russian, String english) {
@@ -208,14 +222,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void importWords(MenuItem item) {
         fileService.openFileDialog(this,
-                (OpenFileDialog.OpenDialogListener)
-                        lambdaWrapper(fileName -> {
-                            try {
-                                gameService.importWords(fileName.toString());
-                            } catch (Exception e) {
-                                throw new RuntimeException(e.getMessage());
-                            }
-                        }));
+                    lambdaWrapper(fileName -> {
+                        try {
+                            gameService.importWords(fileName.toString());
+                        } catch (Exception e) {
+                            throw new RuntimeException(e.getMessage());
+                        }
+                    }));
+        updateAvailableWordsCount();
     }
 
     public void exportWords(MenuItem item) {
@@ -227,13 +241,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void refreshArchive(MenuItem item) {
-//        wordService.refreshArchive();
-        //    updateAvailableWordsCount();
+        gameService.refreshArchive();
+        updateAvailableWordsCount();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        optionsMenu = menu;
         return true;
     }
 

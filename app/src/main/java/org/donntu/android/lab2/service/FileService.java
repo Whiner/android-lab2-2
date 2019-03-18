@@ -14,12 +14,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileService {
     private final String FILE_REGEX_STRUCT = "\\[(.+)]:\\[(.+)]";
-    private final int GROUPS_COUNT = 3;
+    private final int GROUPS_COUNT = 2;
 
     public void exportToFile(String path, String filename, List<WordWithTranslation> words) throws Exception {
         File file = new File(path, filename);
@@ -57,8 +58,8 @@ public class FileService {
         }
     }
 
-    public void openFileDialog(Context context, OpenFileDialog.OpenDialogListener listener) {
+    public void openFileDialog(Context context, Consumer<Object> listener) {
         OpenFileDialog openFileDialog = new OpenFileDialog(context);
-        openFileDialog.setOpenDialogListener(listener).show();
+        openFileDialog.setOpenDialogListener(listener::accept).show();
     }
 }

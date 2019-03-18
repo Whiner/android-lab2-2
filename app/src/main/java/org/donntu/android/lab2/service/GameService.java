@@ -94,4 +94,8 @@ public class GameService {
     public void addWord(String russian, String english) {
         wordService.addAll(Collections.singletonList(new WordWithTranslation(russian, english)));
     }
+
+    public void refreshArchive() {
+        wordService.refreshArchive();
+    }
 }

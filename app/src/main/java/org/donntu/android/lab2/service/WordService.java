@@ -15,6 +15,10 @@ public class WordService {
     public WordWithAnswerVariants nextWord(TranslationType type, int answersVersionsCount) throws Exception {
         NextWordResponse nextWordResponse = requestService.getNextWord(answersVersionsCount);
 
+        if(nextWordResponse == null) {
+            throw new Exception("Internal server error");
+        }
+
         WordWithAnswerVariants word = new WordWithAnswerVariants();
 
         List<WordResponse> answerVersions = nextWordResponse.getAnswerVersions();
@@ -48,10 +52,6 @@ public class WordService {
     }
 
 
-    /*private int countWordsInArchive() {
-
-    }*/
-
     public int getAvailableWordsCount() throws InterruptedException {
         return requestService.getAvailableWordsCount();
     }
@@ -68,5 +68,9 @@ public class WordService {
                                         fullWordInfo.getRussianTranslate(),
                                         fullWordInfo.getEnglishTranslate()))
                 .collect(Collectors.toList());
+    }
+
+    public void refreshArchive() {
+        requestService.refreshArchive();
     }
 }
